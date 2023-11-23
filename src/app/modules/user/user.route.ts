@@ -7,4 +7,4 @@ export const userRoute = express.Router();
 userRoute.get('/', __userController.getUsers);
 
 // create user route
-userRoute.post('/', __userController.createStudent);
+userRoute.post('/', __userController.createUser);
