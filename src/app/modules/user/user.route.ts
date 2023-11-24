@@ -7,7 +7,8 @@ export const userRoute = express.Router();
 userRoute.get('/', __userController.getUsers);
 
 // get single user
-userRoute.get("/:userId", __userController.getSingleUser)
+userRoute.get('/:userId', __userController.getSingleUser);
+
 // create user route
 userRoute.post('/', __userController.createUser);
 

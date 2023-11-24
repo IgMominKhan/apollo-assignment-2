@@ -17,8 +17,8 @@ function getUsersFromDB() {
 }
 
 // get single user from db
-function getSingleUserFromDb(userId) {
-    return User.findOne({userId})
+function getSingleUserFromDb(userId: number) {
+  return User.findOne({ userId }, { _id: false, orders: false });
 }
 
 // create new user
