@@ -21,6 +21,26 @@ async function getUsers(req: Request, res: Response) {
   }
 }
 
+// path : /api/users/:userId
+// method : GET
+async function getSingleUser(req:Request, res:Response) {
+  try {
+    const { userId } = req.params;
+    const data = await __userService.getSingleUserFromDb(userId);
+    res.status(200).json({
+      success:true,
+      message: "Users fetched successfully!",
+      data
+    })
+  }catch (error){
+    res.status(500).json({
+      success:false,
+      message:""
+    })
+  }
+
+
+}
 // path : /api/users
 // method : POST
 async function createUser(req: Request, res: Request) {
@@ -41,4 +61,4 @@ async function createUser(req: Request, res: Request) {
   }
 }
 
-export default { getUsers, createUser };
+export default { getUsers, createUser, getSingleUser };

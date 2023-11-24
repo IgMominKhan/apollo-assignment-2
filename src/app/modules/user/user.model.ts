@@ -1,4 +1,4 @@
-import { model, Schema } from 'mongoose';
+import mongoose, { model, Schema } from 'mongoose';
 import { TAddress, TFullName, TOrder, TUser } from './user.interface';
 
 const fullNameSchema = new Schema<TFullName>(
@@ -53,5 +53,14 @@ const userSchema = new Schema<TUser>({
     default: undefined,
   },
 });
+
+
+// middleware
+userSchema.methods.toJSON= function(){
+  const user = this.toObject()
+  delete user.password
+  return user;
+}
+
 
 export const User = model('User', userSchema);

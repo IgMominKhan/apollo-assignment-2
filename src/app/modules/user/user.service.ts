@@ -16,9 +16,14 @@ function getUsersFromDB() {
   );
 }
 
+// get single user from db
+function getSingleUserFromDb(userId) {
+    return User.findOne({userId})
+}
+
 // create new user
 async function createUserIntoDB(userData: TUser) {
   return await User.create(userData);
 }
 
-export default { getUsersFromDB, createUserIntoDB };
+export default { getUsersFromDB, createUserIntoDB, getSingleUserFromDb };
