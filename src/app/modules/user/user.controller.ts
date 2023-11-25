@@ -29,8 +29,9 @@ async function getSingleUser(req: Request, res: Response) {
   try {
     const { userId } = req.params;
 
-    // @ts-expect-error
-    const isExist = await User.isExists(userId);
+    if (isNaN(Number(userId))) {throw new Error('User id must be a positive number');}
+
+    const isExist = await User.isExists(+userId);
 
     if (!isExist) {
       return res.status(404).json({
@@ -43,7 +44,7 @@ async function getSingleUser(req: Request, res: Response) {
       });
     }
 
-    const data = await __userService.getSingleUserFromDb(Number(userId));
+    const data = await __userService.getSingleUserFromDb(+userId);
     res.status(200).json({
       success: true,
       message: 'Users fetched successfully!',
@@ -53,7 +54,7 @@ async function getSingleUser(req: Request, res: Response) {
     res.status(500).json({
       success: false,
       message: 'Failed to fetch user',
-      error: error,
+      error: error?.message,
     });
   }
 }
@@ -83,13 +84,16 @@ async function createUser(req: Request, res: Response) {
 async function updateUser(req: Request, res: Response) {
   try {
     const { userId } = req.params;
-    const isExist = await User.isUserExist(+userId);
+
+    if (isNaN(Number(userId))) {throw new Error('User id must be a positive number');}
+
+    const isExist = await User.isUserExist(Number(userId));
 
     if (isExist) {
       const validatedUserData = userValidationSchema.parse(req.body);
 
       const data = await __userService.updateUserIntoDB(
-        +userId,
+        Number(userId),
         validatedUserData,
       );
 
@@ -112,7 +116,7 @@ async function updateUser(req: Request, res: Response) {
     res.status(500).json({
       success: false,
       message: 'Failed to update user',
-      error,
+      error:error?.message,
     });
   }
 }
@@ -131,7 +135,7 @@ async function deleteUser(req: Request, res: Response) {
           res.status(200).json({
             success: true,
             message: 'User deleted successfully',
-            data:null,
+            data: null,
           });
         }
       } else {
