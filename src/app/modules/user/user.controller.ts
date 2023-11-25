@@ -2,7 +2,6 @@ import { Request, Response } from 'express';
 import __userService from './user.service';
 import userValidationSchema from './uesr.validation';
 import { User } from './user.model';
-import { isAscii } from 'buffer';
 
 // path : /api/user
 // method : get
@@ -29,8 +28,11 @@ async function getSingleUser(req: Request, res: Response) {
   try {
     const { userId } = req.params;
 
-    if (isNaN(Number(userId))) {throw new Error('User id must be a positive number');}
+    if (isNaN(Number(userId))) {
+      throw new Error('User id must be a positive number');
+    }
 
+    // @ts-expect-error
     const isExist = await User.isExists(+userId);
 
     if (!isExist) {
@@ -54,6 +56,7 @@ async function getSingleUser(req: Request, res: Response) {
     res.status(500).json({
       success: false,
       message: 'Failed to fetch user',
+      // @ts-expect-error
       error: error?.message,
     });
   }
@@ -85,7 +88,9 @@ async function updateUser(req: Request, res: Response) {
   try {
     const { userId } = req.params;
 
-    if (isNaN(Number(userId))) {throw new Error('User id must be a positive number');}
+    if (isNaN(Number(userId))) {
+      throw new Error('User id must be a positive number');
+    }
 
     const isExist = await User.isUserExist(Number(userId));
 
@@ -116,7 +121,8 @@ async function updateUser(req: Request, res: Response) {
     res.status(500).json({
       success: false,
       message: 'Failed to update user',
-      error:error?.message,
+      // @ts-expect-error
+      error: error?.message,
     });
   }
 }
@@ -154,6 +160,7 @@ async function deleteUser(req: Request, res: Response) {
     res.status(500).json({
       success: false,
       message: 'Failed to delete user',
+      // @ts-expect-error
       error: error?.message,
     });
   }
