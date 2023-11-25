@@ -26,4 +26,10 @@ async function createUserIntoDB(userData: TUser) {
   return await User.create(userData);
 }
 
-export default { getUsersFromDB, createUserIntoDB, getSingleUserFromDb };
+// update user
+async function updateUserIntoDB(userId:number,userData:TUser) {
+    const updatedData = await User.findOneAndUpdate({userId},userData,{new:true}).select({_id:0,orders:0})
+    return updatedData;
+}
+
+export default { getUsersFromDB, createUserIntoDB, getSingleUserFromDb, updateUserIntoDB };

@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import __userService from './user.service';
 import userValidationSchema from './uesr.validation';
 import { User } from './user.model';
+import userController from "./user.controller";
 
 // path : /api/user
 // method : get
@@ -26,10 +27,9 @@ async function getUsers(_req: Request, res: Response) {
 // method : GET
 async function getSingleUser(req: Request, res: Response) {
   try {
-    const { userId } = req.params;
+    let { userId } = req.params;
 
-    // @ts-ignore
-    const isExist = await User.isExists(Number(userId));
+    const isExist = await User.isExists(userId);
 
     if (!isExist) {
       return res.status(404).json({
@@ -56,6 +56,7 @@ async function getSingleUser(req: Request, res: Response) {
     });
   }
 }
+
 // path : /api/users
 // method : POST
 async function createUser(req: Request, res: Response) {
@@ -76,4 +77,40 @@ async function createUser(req: Request, res: Response) {
   }
 }
 
-export default { getUsers, createUser, getSingleUser };
+// method : PUT
+// path : /api/users/:userId
+async function updateUser(req: Request, res: Response) {
+  try {
+    const { userId } = req.params;
+    const isExist = await User.isUserExist(userId);
+
+    if (isExist) {
+      const validatedUserData = userValidationSchema.parse(req.body);
+
+      const data = await __userService.updateUserIntoDB(Number(userId), validatedUserData);
+
+
+      res.status(200).json({
+        success: true,
+        message: 'Successfully updated user information',
+        data,
+      });
+    } else {
+      res.status(404).json({
+        success: false,
+        message: 'User not found',
+        error: {
+          code: 404,
+          description: 'User not found',
+        },
+      });
+    }
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Failed to update user',
+      error,
+    });
+  }
+}
+export default { getUsers, createUser, getSingleUser, updateUser };

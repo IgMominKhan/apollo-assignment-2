@@ -1,5 +1,11 @@
 import { model, Schema } from 'mongoose';
-import { TAddress, TFullName, TOrder, TUser } from './user.interface';
+import {
+  IUserModel,
+  TAddress,
+  TFullName,
+  TOrder,
+  TUser,
+} from './user.interface';
 
 const fullNameSchema = new Schema<TFullName>(
   {
@@ -26,7 +32,7 @@ const orderSchema = new Schema<TOrder>({
   quantity: Number,
 });
 
-const userSchema = new Schema<TUser>(
+const userSchema = new Schema<TUser, IUserModel>(
   {
     userId: {
       type: Number,
@@ -55,6 +61,8 @@ const userSchema = new Schema<TUser>(
     },
   },
   {
+    // auto typed static function
+    // has been used in getting single user data
     statics: {
       async isExists(userId) {
         return !!(await this.exists({ userId }));
@@ -70,4 +78,9 @@ userSchema.methods.toJSON = function () {
   return user;
 };
 
-export const User = model('User', userSchema);
+// typed static method
+userSchema.static('isUserExist', async function isUserExist(userId) {
+  return !!(await this.exists({ userId }));
+});
+
+export const User = model<TUser, IUserModel>('User', userSchema);

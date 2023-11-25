@@ -12,4 +12,5 @@ userRoute.get('/:userId', __userController.getSingleUser);
 // create user route
 userRoute.post('/', __userController.createUser);
 
-//
+// update a single user
+userRoute.put('/:userId', __userController.updateUser);
