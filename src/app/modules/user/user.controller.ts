@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import __userService from './user.service';
 import userValidationSchema from './uesr.validation';
 import { User } from './user.model';
-import userController from "./user.controller";
+import { isAscii } from 'buffer';
 
 // path : /api/user
 // method : get
@@ -27,8 +27,9 @@ async function getUsers(_req: Request, res: Response) {
 // method : GET
 async function getSingleUser(req: Request, res: Response) {
   try {
-    let { userId } = req.params;
+    const { userId } = req.params;
 
+    // @ts-expect-error
     const isExist = await User.isExists(userId);
 
     if (!isExist) {
@@ -82,13 +83,15 @@ async function createUser(req: Request, res: Response) {
 async function updateUser(req: Request, res: Response) {
   try {
     const { userId } = req.params;
-    const isExist = await User.isUserExist(userId);
+    const isExist = await User.isUserExist(+userId);
 
     if (isExist) {
       const validatedUserData = userValidationSchema.parse(req.body);
 
-      const data = await __userService.updateUserIntoDB(Number(userId), validatedUserData);
-
+      const data = await __userService.updateUserIntoDB(
+        +userId,
+        validatedUserData,
+      );
 
       res.status(200).json({
         success: true,
@@ -113,4 +116,43 @@ async function updateUser(req: Request, res: Response) {
     });
   }
 }
-export default { getUsers, createUser, getSingleUser, updateUser };
+
+// method : DELETE
+// path : /api/users/:userId
+async function deleteUser(req: Request, res: Response) {
+  try {
+    const { userId } = req.params;
+
+    if (!isNaN(Number(userId))) {
+      const isExist = await User.isUserExist(+userId);
+      if (isExist) {
+        const data = await __userService.deleteUser(+userId);
+        if (data.deletedCount) {
+          res.status(200).json({
+            success: true,
+            message: 'User deleted successfully',
+            data:null,
+          });
+        }
+      } else {
+        res.status(404).json({
+          success: false,
+          message: 'User not found',
+          error: {
+            code: 404,
+            description: 'User not found',
+          },
+        });
+      }
+    } else throw new Error('User id must be a positive number');
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to delete user',
+      error: error?.message,
+    });
+  }
+}
+
+export default { getUsers, createUser, getSingleUser, updateUser, deleteUser };

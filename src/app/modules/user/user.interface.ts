@@ -1,5 +1,4 @@
 import { Model } from 'mongoose';
-import { promises } from 'dns';
 
 export type TFullName = {
   firstName: string;
@@ -32,5 +31,5 @@ export type TUser = {
 
 // model interface
 export interface IUserModel extends Model<TUser> {
-  isUserExist(userId: string): unknown;
+  isUserExist(userId: number): unknown;
 }

@@ -14,3 +14,6 @@ userRoute.post('/', __userController.createUser);
 
 // update a single user
 userRoute.put('/:userId', __userController.updateUser);
+
+// delete an user
+userRoute.delete('/:userId', __userController.deleteUser);
