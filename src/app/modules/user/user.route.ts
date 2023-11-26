@@ -19,10 +19,13 @@ userRoute.put('/:userId', __userController.updateUser);
 userRoute.delete('/:userId', __userController.deleteUser);
 
 // get order of an user
-userRoute.get("/:userId/orders",__userController.getOrders)
+userRoute.get('/:userId/orders', __userController.getOrders);
 
 // add a new order
 userRoute.put('/:userId/orders', __userController.addAnOrder);
 
 // total price of specific user
-userRoute.get("/:userId/orders/total-price", __userController.totalPriceOfOrders)
+userRoute.get(
+  '/:userId/orders/total-price',
+  __userController.totalPriceOfOrders,
+);

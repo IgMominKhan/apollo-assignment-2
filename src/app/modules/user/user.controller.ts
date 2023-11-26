@@ -137,20 +137,20 @@ async function deleteUser(req: Request, res: Response) {
 
 // method : GET
 // path : /api/users/:userId/orders
-async function getOrders(req:Request,res:Response){
-  const {userId} = req.params
+async function getOrders(req: Request, res: Response) {
+  const { userId } = req.params;
 
-  if(isNaN(+userId)) throw new Error("User Id must be a positive number")
+  if (isNaN(+userId)) throw new Error('User Id must be a positive number');
 
   // @ts-expect-error ignore res parameter ts error
-  const isExist = User.isUserExist(+userId,res)
+  const isExist = User.isUserExist(+userId, res);
 
   const data = await __userService.getOrders(+userId);
   res.status(200).json({
-    success:true,
-    message:"Order fetched successfully!",
-    data
-  })
+    success: true,
+    message: 'Order fetched successfully!',
+    data,
+  });
 }
 
 // method : PUT
@@ -188,15 +188,24 @@ async function addAnOrder(req: Request, res: Response) {
 
 // method : GET
 // path : /api/users/:userId/orders/total-price
-async  function totalPriceOfOrders(req: Request, res: Response) {
-  const { userId} = req.params;
+async function totalPriceOfOrders(req: Request, res: Response) {
+  const { userId } = req.params;
 
-  if(isNaN(+userId)) throw new Error("User Id must be a positive number")
+  if (isNaN(+userId)) throw new Error('User Id must be a positive number');
 
   // @ts-expect-error res parameter error
-  const isExist = User.isUserExist(+userId,res)
+  const isExist = User.isUserExist(+userId, res);
 
-  const data = await __userService.totalPriceOfOrders(+userId)
+  let result = await __userService.totalPriceOfOrders(+userId);
+
+  const totalPrice = result[0].totalPrice.toFixed(2)
+  res.status(200).json({
+    success:true,
+    message: "Total price calculated successfully!",
+    data: {
+      totalPrice:+totalPrice
+    }
+  })
 }
 export default {
   getUsers,
@@ -206,5 +215,5 @@ export default {
   deleteUser,
   getOrders,
   addAnOrder,
-  totalPriceOfOrders
+  totalPriceOfOrders,
 };

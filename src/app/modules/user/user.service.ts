@@ -42,9 +42,9 @@ async function deleteUser(userId: number) {
 }
 
 // get order of an user
-async function getOrders(userId:number) {
-    const result = await User.findOne({userId},{orders:1,_id:0});
-    return result
+async function getOrders(userId: number) {
+  const result = await User.findOne({ userId }, { orders: 1, _id: 0 });
+  return result;
 }
 
 // add new order
@@ -58,14 +58,48 @@ async function addNewOrderIntoDB(userId: number, order: TOrder) {
 }
 
 // get the total price of an user
-async function totalPriceOfOrders(userId:number) {
-    const result = await User.aggregate([{$match: {userId}},{$projection:{orders:true}}])
+async function totalPriceOfOrders(userId: number) {
+  const result = await User.aggregate([
+    {
+      $match: { userId: 1 },
+    },
+    {
+      $project: { orders: 1 },
+    },
+    {
+      $unwind: '$orders',
+    },
+    {
+      $project: {
+        totalPerOrder: {
+          $multiply: ['$orders.price', '$orders.quantity'],
+        },
+      },
+    },
+    {
+      $group: {
+        _id: null,
+        totalPrice: {
+          $sum: '$totalPerOrder',
+        },
+      },
+    },
+      {
+          $unset:"_id"
+      }
+  ]);
+
+  return result
 }
+
+
 export default {
   getUsersFromDB,
   createUserIntoDB,
   getSingleUserFromDb,
   updateUserIntoDB,
   deleteUser,
-  addNewOrderIntoDB, getOrders, totalPriceOfOrders
+  addNewOrderIntoDB,
+  getOrders,
+  totalPriceOfOrders,
 };
