@@ -17,3 +17,6 @@ userRoute.put('/:userId', __userController.updateUser);
 
 // delete an user
 userRoute.delete('/:userId', __userController.deleteUser);
+
+// add a new order
+userRoute.put('/:userId/orders', __userController.addAnOrder);

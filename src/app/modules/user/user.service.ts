@@ -1,4 +1,4 @@
-import { TUser } from './user.interface';
+import { TOrder, TUser } from './user.interface';
 import { User } from './user.model';
 
 // get all users
@@ -30,6 +30,7 @@ async function createUserIntoDB(userData: TUser) {
 async function updateUserIntoDB(userId: number, userData: TUser) {
   const updatedData = await User.findOneAndUpdate({ userId }, userData, {
     new: true,
+    runValidators: true,
   }).select({ _id: 0, orders: 0 });
   return updatedData;
 }
@@ -40,10 +41,22 @@ async function deleteUser(userId: number) {
   return data;
 }
 
+// add new order
+async function addNewOrderIntoDB(userId: number, order: TOrder) {
+  const result = await User.findOneAndUpdate(
+    { userId },
+    { $push: { orders: order } },
+    { upsert: true, runValidators: true },
+  );
+
+  return result;
+}
+
 export default {
   getUsersFromDB,
   createUserIntoDB,
   getSingleUserFromDb,
   updateUserIntoDB,
   deleteUser,
+  addNewOrderIntoDB,
 };

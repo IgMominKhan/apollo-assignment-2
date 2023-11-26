@@ -1,9 +1,9 @@
 import { Request, Response } from 'express';
 import __userService from './user.service';
-import userValidationSchema from './uesr.validation';
+import userValidationSchema, { orderValidationSchema } from './uesr.validation';
 import { User } from './user.model';
 
-// path : /api/user
+// path : /api/users
 // method : get
 async function getUsers(_req: Request, res: Response) {
   try {
@@ -33,18 +33,7 @@ async function getSingleUser(req: Request, res: Response) {
     }
 
     // @ts-expect-error
-    const isExist = await User.isExists(+userId);
-
-    if (!isExist) {
-      return res.status(404).json({
-        success: false,
-        message: 'User not found',
-        error: {
-          code: 404,
-          description: 'User not found!',
-        },
-      });
-    }
+    const isExist = User.isUserExist(+userId, res);
 
     const data = await __userService.getSingleUserFromDb(+userId);
     res.status(200).json({
@@ -92,31 +81,21 @@ async function updateUser(req: Request, res: Response) {
       throw new Error('User id must be a positive number');
     }
 
-    const isExist = await User.isUserExist(Number(userId));
+    const validatedUserData = userValidationSchema.parse(req.body);
 
-    if (isExist) {
-      const validatedUserData = userValidationSchema.parse(req.body);
+    // @ts-expect-error
+    const isExist = User.isUserExist(+userId, res);
 
-      const data = await __userService.updateUserIntoDB(
-        Number(userId),
-        validatedUserData,
-      );
+    const data = await __userService.updateUserIntoDB(
+      +userId,
+      validatedUserData,
+    );
 
-      res.status(200).json({
-        success: true,
-        message: 'Successfully updated user information',
-        data,
-      });
-    } else {
-      res.status(404).json({
-        success: false,
-        message: 'User not found',
-        error: {
-          code: 404,
-          description: 'User not found',
-        },
-      });
-    }
+    res.status(200).json({
+      success: true,
+      message: 'Successfully updated user information',
+      data,
+    });
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -133,30 +112,20 @@ async function deleteUser(req: Request, res: Response) {
   try {
     const { userId } = req.params;
 
-    if (!isNaN(Number(userId))) {
-      const isExist = await User.isUserExist(+userId);
-      if (isExist) {
-        const data = await __userService.deleteUser(+userId);
-        if (data.deletedCount) {
-          res.status(200).json({
-            success: true,
-            message: 'User deleted successfully',
-            data: null,
-          });
-        }
-      } else {
-        res.status(404).json({
-          success: false,
-          message: 'User not found',
-          error: {
-            code: 404,
-            description: 'User not found',
-          },
-        });
-      }
-    } else throw new Error('User id must be a positive number');
+    if (isNaN(+userId)) throw new Error('User Id must be a positive number');
+
+    // @ts-expect-error
+    const isExist = User.isUserExist(+userId, res);
+
+    const data = await __userService.deleteUser(+userId);
+    if (data.deletedCount) {
+      res.status(200).json({
+        success: true,
+        message: 'User deleted successfully',
+        data: null,
+      });
+    }
   } catch (error) {
-    console.error(error);
     res.status(500).json({
       success: false,
       message: 'Failed to delete user',
@@ -166,4 +135,45 @@ async function deleteUser(req: Request, res: Response) {
   }
 }
 
-export default { getUsers, createUser, getSingleUser, updateUser, deleteUser };
+// method : PUT
+// path : /api/users/:userId/orders
+async function addAnOrder(req: Request, res: Response) {
+  try {
+    const { userId } = req.params;
+
+    if (isNaN(+userId)) throw new Error('User Id must be a positive number');
+
+    // @ts-expect-error
+    const isExist = User.isUserExist(+userId, res);
+
+    const validatedOrderData = orderValidationSchema.parse(req.body);
+
+    const data = await __userService.addNewOrderIntoDB(
+      +userId,
+      validatedOrderData,
+    );
+
+    console.log(data);
+    res.status(200).json({
+      success: true,
+      message: 'Order created successfully',
+      data: null,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Failed to add order',
+      // @ts-expect-error
+      error: error?.message,
+    });
+  }
+}
+
+export default {
+  getUsers,
+  createUser,
+  getSingleUser,
+  updateUser,
+  deleteUser,
+  addAnOrder,
+};

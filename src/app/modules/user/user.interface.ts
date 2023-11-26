@@ -31,5 +31,5 @@ export type TUser = {
 
 // model interface
 export interface IUserModel extends Model<TUser> {
-  isUserExist(userId: number): unknown;
+  isUserExist(userId: number, res: Response): boolean | void;
 }

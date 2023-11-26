@@ -32,44 +32,33 @@ const orderSchema = new Schema<TOrder>({
   quantity: Number,
 });
 
-const userSchema = new Schema<TUser, IUserModel>(
-  {
-    userId: {
-      type: Number,
-      unique: true,
-    },
+const userSchema = new Schema<TUser, IUserModel>({
+  userId: {
+    type: Number,
+    unique: true,
+  },
 
-    username: {
-      type: String,
-      unique: true,
-    },
-    password: String,
-    fullName: fullNameSchema,
-    age: Number,
-    isActive: {
-      type: Boolean,
-      default: true,
-    },
-    hobbies: {
-      type: [String],
-      default: undefined,
-    },
-    address: addressSchema,
-    orders: {
-      type: [orderSchema],
-      default: undefined,
-    },
+  username: {
+    type: String,
+    unique: true,
   },
-  {
-    // auto typed static function
-    // has been used in getting single user data
-    statics: {
-      async isExists(userId) {
-        return !!(await this.exists({ userId }));
-      },
-    },
+  password: String,
+  fullName: fullNameSchema,
+  age: Number,
+  isActive: {
+    type: Boolean,
+    default: true,
   },
-);
+  hobbies: {
+    type: [String],
+    default: undefined,
+  },
+  address: addressSchema,
+  orders: {
+    type: [orderSchema],
+    default: undefined,
+  },
+});
 
 // middlewares
 userSchema.methods.toJSON = function () {
@@ -79,8 +68,25 @@ userSchema.methods.toJSON = function () {
 };
 
 // typed static method
-userSchema.static('isUserExist', async function isUserExist(userId) {
-  return !!(await this.exists({ userId }));
-});
+userSchema.static(
+  'isUserExist',
+  async function isUserExist(userId: number, res: Response) {
+    const isExist = !!(await this.exists({ userId }));
+
+    if (isExist) {
+      return isExist;
+    } else {
+      // @ts-expect-error
+      res.status(404).json({
+        success: false,
+        message: 'User not found',
+        error: {
+          code: 404,
+          description: 'User not found',
+        },
+      });
+    }
+  },
+);
 
 export const User = model<TUser, IUserModel>('User', userSchema);
