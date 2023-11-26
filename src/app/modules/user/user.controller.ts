@@ -186,6 +186,18 @@ async function addAnOrder(req: Request, res: Response) {
   }
 }
 
+// method : GET
+// path : /api/users/:userId/orders/total-price
+async  function totalPriceOfOrders(req: Request, res: Response) {
+  const { userId} = req.params;
+
+  if(isNaN(+userId)) throw new Error("User Id must be a positive number")
+
+  // @ts-expect-error res parameter error
+  const isExist = User.isUserExist(+userId,res)
+
+  const data = await __userService.totalPriceOfOrders(+userId)
+}
 export default {
   getUsers,
   createUser,
@@ -194,4 +206,5 @@ export default {
   deleteUser,
   getOrders,
   addAnOrder,
+  totalPriceOfOrders
 };
