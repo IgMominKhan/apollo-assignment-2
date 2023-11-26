@@ -41,6 +41,12 @@ async function deleteUser(userId: number) {
   return data;
 }
 
+// get order of an user
+async function getOrders(userId:number) {
+    const result = await User.findOne({userId},{orders:1,_id:0});
+    return result
+}
+
 // add new order
 async function addNewOrderIntoDB(userId: number, order: TOrder) {
   const result = await User.findOneAndUpdate(
@@ -48,7 +54,6 @@ async function addNewOrderIntoDB(userId: number, order: TOrder) {
     { $push: { orders: order } },
     { upsert: true, runValidators: true },
   );
-
   return result;
 }
 
@@ -58,5 +63,5 @@ export default {
   getSingleUserFromDb,
   updateUserIntoDB,
   deleteUser,
-  addNewOrderIntoDB,
+  addNewOrderIntoDB, getOrders
 };

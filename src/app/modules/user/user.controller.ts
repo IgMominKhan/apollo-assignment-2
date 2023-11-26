@@ -135,6 +135,24 @@ async function deleteUser(req: Request, res: Response) {
   }
 }
 
+// method : GET
+// path : /api/users/:userId/orders
+async function getOrders(req:Request,res:Response){
+  const {userId} = req.params
+
+  if(isNaN(+userId)) throw new Error("User Id must be a positive number")
+
+  // @ts-expect-error ignore res parameter ts error
+  const isExist = User.isUserExist(+userId,res)
+
+  const data = await __userService.getOrders(+userId);
+  res.status(200).json({
+    success:true,
+    message:"Order fetched successfully!",
+    data
+  })
+}
+
 // method : PUT
 // path : /api/users/:userId/orders
 async function addAnOrder(req: Request, res: Response) {
@@ -153,7 +171,6 @@ async function addAnOrder(req: Request, res: Response) {
       validatedOrderData,
     );
 
-    console.log(data);
     res.status(200).json({
       success: true,
       message: 'Order created successfully',
@@ -175,5 +192,6 @@ export default {
   getSingleUser,
   updateUser,
   deleteUser,
+  getOrders,
   addAnOrder,
 };

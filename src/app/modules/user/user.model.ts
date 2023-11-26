@@ -30,7 +30,8 @@ const orderSchema = new Schema<TOrder>({
   productName: String,
   price: Number,
   quantity: Number,
-});
+},
+    {_id:false});
 
 const userSchema = new Schema<TUser, IUserModel>({
   userId: {
