@@ -6,9 +6,8 @@ import {
   TOrder,
   TUser,
 } from './user.interface';
-import bcrypt from "bcrypt";
-import {SALT_ROUND} from "../../config";
-import {unknown} from "zod";
+import bcrypt from 'bcrypt';
+import { SALT_ROUND } from '../../config';
 
 const fullNameSchema = new Schema<TFullName>(
   {
@@ -97,16 +96,25 @@ userSchema.static(
   },
 );
 
-
 // encrypt password
-userSchema.pre("save",function(next){
+userSchema.pre('save', function (next) {
+  // @ts-expect-error
+  bcrypt.hash(this.password, +SALT_ROUND, (err, hash) => {
+    if (err) throw err;
+    this.password = hash;
+    next();
+  });
+});
+
+// encrypt password while update
+userSchema.pre('findOneAndUpdate', function (next) {
+  // @ts-expect-error
+  bcrypt.hash(this._update.password, +SALT_ROUND, (err, hash) => {
+    if (err) throw err;
 
     // @ts-expect-error
-     bcrypt.hash(this.password, +SALT_ROUND, (err,hash)=>{
-         if(err) throw err
-         this.password = hash
-         next()
-     })
-
+    this._update.password = hash;
+    next();
+  });
 });
 export const User = model<TUser, IUserModel>('User', userSchema);
