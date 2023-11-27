@@ -6,7 +6,9 @@ import {
   TOrder,
   TUser,
 } from './user.interface';
-import { exists } from 'fs';
+import bcrypt from "bcrypt";
+import {SALT_ROUND} from "../../config";
+import {unknown} from "zod";
 
 const fullNameSchema = new Schema<TFullName>(
   {
@@ -95,4 +97,16 @@ userSchema.static(
   },
 );
 
+
+// encrypt password
+userSchema.pre("save",function(next){
+
+    // @ts-expect-error
+     bcrypt.hash(this.password, +SALT_ROUND, (err,hash)=>{
+         if(err) throw err
+         this.password = hash
+         next()
+     })
+
+});
 export const User = model<TUser, IUserModel>('User', userSchema);
