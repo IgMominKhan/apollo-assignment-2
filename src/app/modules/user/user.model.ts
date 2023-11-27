@@ -6,6 +6,7 @@ import {
   TOrder,
   TUser,
 } from './user.interface';
+import { exists } from 'fs';
 
 const fullNameSchema = new Schema<TFullName>(
   {
@@ -88,6 +89,8 @@ userSchema.static(
           description: 'User not found',
         },
       });
+
+      return isExist;
     }
   },
 );

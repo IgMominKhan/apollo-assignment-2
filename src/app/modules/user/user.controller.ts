@@ -28,12 +28,12 @@ async function getSingleUser(req: Request, res: Response) {
   try {
     const { userId } = req.params;
 
-    if (isNaN(Number(userId))) {
+    if (isNaN(Number(userId)))
       throw new Error('User id must be a positive number');
-    }
 
     // @ts-expect-error
-    const isExist = User.isUserExist(+userId, res);
+    const isExist = await User.isUserExist(+userId, res);
+    if (!isExist) return;
 
     const data = await __userService.getSingleUserFromDb(+userId);
     res.status(200).json({
@@ -77,14 +77,14 @@ async function updateUser(req: Request, res: Response) {
   try {
     const { userId } = req.params;
 
-    if (isNaN(Number(userId))) {
+    if (isNaN(Number(userId)))
       throw new Error('User id must be a positive number');
-    }
 
     const validatedUserData = userValidationSchema.parse(req.body);
 
     // @ts-expect-error
-    const isExist = User.isUserExist(+userId, res);
+    const isExist = await User.isUserExist(+userId, res);
+    if (!isExist) return;
 
     const data = await __userService.updateUserIntoDB(
       +userId,
@@ -109,13 +109,15 @@ async function updateUser(req: Request, res: Response) {
 // method : DELETE
 // path : /api/users/:userId
 async function deleteUser(req: Request, res: Response) {
+  // noinspection ExceptionCaughtLocallyJS
   try {
     const { userId } = req.params;
 
     if (isNaN(+userId)) throw new Error('User Id must be a positive number');
 
     // @ts-expect-error
-    const isExist = User.isUserExist(+userId, res);
+    const isExist = await User.isUserExist(+userId, res);
+    if (!isExist) return;
 
     const data = await __userService.deleteUser(+userId);
     if (data.deletedCount) {
@@ -138,19 +140,34 @@ async function deleteUser(req: Request, res: Response) {
 // method : GET
 // path : /api/users/:userId/orders
 async function getOrders(req: Request, res: Response) {
-  const { userId } = req.params;
+  try {
+    const { userId } = req.params;
 
-  if (isNaN(+userId)) throw new Error('User Id must be a positive number');
+    if (isNaN(+userId)) throw new Error('User Id must be a positive number');
 
-  // @ts-expect-error ignore res parameter ts error
-  const isExist = User.isUserExist(+userId, res);
+    // @ts-expect-error ignore res parameter ts error
+    const isExist = await User.isUserExist(+userId, res);
+    if (!isExist) return;
 
-  const data = await __userService.getOrders(+userId);
-  res.status(200).json({
-    success: true,
-    message: 'Order fetched successfully!',
-    data,
-  });
+    const data = await __userService.getOrders(+userId);
+
+    res.status(200).json({
+      success: true,
+      message: 'Order fetched successfully!',
+      data,
+    });
+  } catch (error) {
+    res.status(404).json({
+      success: false,
+      message: 'User not found',
+      error: {
+        code: 404,
+        description: 'User not found',
+      },
+    });
+
+    return;
+  }
 }
 
 // method : PUT
@@ -162,7 +179,9 @@ async function addAnOrder(req: Request, res: Response) {
     if (isNaN(+userId)) throw new Error('User Id must be a positive number');
 
     // @ts-expect-error
-    const isExist = User.isUserExist(+userId, res);
+    const isExist = await User.isUserExist(+userId, res);
+
+    if (!isExist) return;
 
     const validatedOrderData = orderValidationSchema.parse(req.body);
 
@@ -189,23 +208,37 @@ async function addAnOrder(req: Request, res: Response) {
 // method : GET
 // path : /api/users/:userId/orders/total-price
 async function totalPriceOfOrders(req: Request, res: Response) {
-  const { userId } = req.params;
+  try {
+    const { userId } = req.params;
 
-  if (isNaN(+userId)) throw new Error('User Id must be a positive number');
+    if (isNaN(Number(userId)))
+      throw new Error('User Id must be a positive number');
 
-  // @ts-expect-error res parameter error
-  const isExist = User.isUserExist(+userId, res);
+    // @ts-expect-error res parameter error
+    const isExist = await User.isUserExist(+userId, res);
 
-  let result = await __userService.totalPriceOfOrders(+userId);
+    if (!isExist) return;
 
-  const totalPrice = result[0].totalPrice.toFixed(2)
-  res.status(200).json({
-    success:true,
-    message: "Total price calculated successfully!",
-    data: {
-      totalPrice:+totalPrice
-    }
-  })
+    const result = await __userService.totalPriceOfOrders(+userId);
+
+    const totalPrice = result[0].totalPrice.toFixed(2);
+    res.status(200).json({
+      success: true,
+      message: 'Total price calculated successfully!',
+      data: {
+        totalPrice: +totalPrice,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'User not found',
+      error: {
+        code: 404,
+        description: 'User not found!',
+      },
+    });
+  }
 }
 export default {
   getUsers,

@@ -61,7 +61,7 @@ async function addNewOrderIntoDB(userId: number, order: TOrder) {
 async function totalPriceOfOrders(userId: number) {
   const result = await User.aggregate([
     {
-      $match: { userId: 1 },
+      $match: { userId },
     },
     {
       $project: { orders: 1 },
@@ -84,14 +84,13 @@ async function totalPriceOfOrders(userId: number) {
         },
       },
     },
-      {
-          $unset:"_id"
-      }
+    {
+      $unset: '_id',
+    },
   ]);
 
-  return result
+  return result;
 }
-
 
 export default {
   getUsersFromDB,
